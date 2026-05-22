@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { isLoggedIn, removeUserInfo, getUserInfo } from "../../services/auth.service";
-import { Link } from "react-router-dom";
+import { Link, useNavigate} from "react-router-dom";
 import { USER_ROLE } from "../../constants/role";
 import logo from "../../assets/logoNew.png";
 import NotificationComponent from "../notification/notification.component";
@@ -8,6 +8,7 @@ import { useNotifications } from "../../hooks/useNotifications";
 
 const NavListComponent: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState<boolean>(isLoggedIn());
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -55,11 +56,13 @@ const NavListComponent: React.FC = () => {
         <div className="flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <Link to="/">
-            <img src={logo} alt="logo" width={50} height={50} />
+            <img src={logo} alt="logo" className="h-10 w-auto object-contain" />
           </Link>
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-gray-400 hover:text-custom transition">HOME</Link>
             <Link to="/explore" className="text-gray-400 hover:text-custom transition">EXPLORE</Link>
+            <Link to="/story-inspiration" className="text-gray-400 hover:text-custom transition">INSPIRING STORIES</Link>
+            <Link to="/contact-us" className="text-gray-400 hover:text-custom transition">CONTACT US</Link>
             <Link to="/community" className="text-gray-400 hover:text-custom transition">COMMUNITY</Link>
             {isLogin && (
               <>
@@ -74,12 +77,39 @@ const NavListComponent: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-3">
-            <button type="button" className="p-2 text-gray-400 hover:text-gray-500">
+            <button
+<<<<<<< HEAD
+              type="button"
+              className="!rounded-button p-2 text-gray-400 hover:text-gray-500"
+              aria-label="Search"
+            >
+              <i className="fas fa-search" aria-hidden="true"></i>
+            </button>
+            <div className="ml-3 relative">
+              <div className="relative inline-flex">
+                <button
+                  type="button"
+                  className="!rounded-button p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none"
+                  onClick={() => setShowNotification(true)}
+                  aria-label="Notifications"
+                >
+                  <i className="fa-solid fa-bell" aria-hidden="true"></i>
+                </button>
+                <span className="absolute top-0.5 right-0.5 grid min-h-[18px] min-w-[18px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-700 text-xs text-gray-400">
+                  {newNotify}
+                </span>
+              </div>
+=======
+            type="button"
+            aria-label="Open Help Center"
+            onClick={() => navigate("/help-center")}
+            className="p-2 text-gray-400 hover:text-white transition">
               <i className="fas fa-search"></i>
             </button>
             <div className="relative inline-flex" ref={notificationMenuRef}>
               <button
                 type="button"
+                aria-label="Notifications"
                 className="relative rounded-full p-2 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
                 data-notification-trigger="true"
                 onClick={toggle}
@@ -91,23 +121,34 @@ const NavListComponent: React.FC = () => {
                   </span>
                 )}
               </button>
+>>>>>>> upstream/main
             </div>
             {isLogin ? (
-              <button onClick={handelLogout} className="text-gray-400 px-6 py-2 font-medium cursor-pointer">
+              <button onClick={handelLogout} className="text-gray-400 px-4 py-2 font-medium cursor-pointer rounded-md hover:bg-white/5 hover:text-white transition">
                 LOGOUT
               </button>
             ) : (
-              <Link to="/login">
-                <button className="text-gray-400 px-6 py-2 font-medium cursor-pointer">
-                  LOGIN
-                </button>
-              </Link>
+              <>
+                <Link to="/login">
+                  <button className="text-gray-400 px-4 py-2 font-medium cursor-pointer rounded-md hover:bg-white/5 hover:text-white transition">
+                    LOGIN
+                  </button>
+                </Link>
+                <Link to="/signup">
+                  <button className="text-gray-400 px-4 py-2 font-medium cursor-pointer rounded-md hover:bg-white/5 hover:text-white transition">
+                    SIGN UP
+                  </button>
+                </Link>
+              </>
             )}
           </div>
 
-          <button className="md:hidden text-gray-400 hover:text-gray-300 p-2"
+          <button
+            type="button"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            className="md:hidden text-gray-400 hover:text-gray-300 p-2"
             onClick={() => setMenuOpen((prev) => !prev)}>
-            <i className={`fas ${menuOpen ? "fa-xmark" : "fa-bars"} text-xl`}></i>
+            <i className={`fas ${menuOpen ? "fa-xmark" : "fa-bars"} text-xl`} />
           </button>
         </div>
       </div>
@@ -142,7 +183,10 @@ const NavListComponent: React.FC = () => {
                 LOGOUT
               </button>
             ) : (
-              <Link to="/login" className="text-gray-400 py-2">LOGIN</Link>
+              <>
+                <Link to="/login" className="text-gray-400 block px-3 py-2 rounded-md hover:bg-white/5 hover:text-white">LOGIN</Link>
+                <Link to="/signup" className="text-gray-400 block px-3 py-2 rounded-md hover:bg-white/5 hover:text-white">SIGN UP</Link>
+              </>
             )
           }
         </div>

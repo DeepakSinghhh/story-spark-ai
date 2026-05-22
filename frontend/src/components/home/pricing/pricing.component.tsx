@@ -99,7 +99,7 @@ const PricingComponent = () => {
               ))}
             </ul>
             <button
-              className={`w-full !rounded-button px-4 py-2 ${plan.buttonStyle}`}
+              className={`w-full !rounded-button px-4 py-2 mt-auto ${plan.buttonStyle}`}
             >
               {plan.buttonLabel}
             </button>

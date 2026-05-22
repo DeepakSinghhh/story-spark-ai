@@ -1,3 +1,4 @@
+import StoryInspirationWrapper from "./components/StoryInspirationWrapper";
 import { JSX, useEffect, useState } from "react";
 import WritingAssistantComponent from "./components/writing-assistant/writing_assistant.component";
 import {
@@ -6,6 +7,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
 
 import HeroSectionComponent from "./components/hero/hero_section.component";
 import HomeComponent from "./components/home/home.component";
@@ -29,11 +31,14 @@ import EmailValidationComponent from "./components/email_validation/email.valida
 import { USER_ROLE } from "./constants/role";
 import PostListsComponent from "./components/dashboard/posts/post_lists.component";
 import ProfileComponent from "./components/dashboard/profile/profile.component";
+import Contact from "./components/contactus/contactus";
 import HelpCenterComponent from "./components/help_center/help_center.component";
+import ErrorBoundary from "./components/ErrorBoundary";
+
 
 import AboutUsComponent from "./components/footer/about-us.tsx";
 import CareerComponent from "./components/footer/career.tsx";
-import ContactUsComponent from "./components/footer/contact-us.tsx";
+// import ContactUsComponent from "./components/footer/contact-us.tsx";
 import BlogComponent from "./components/footer/blog.tsx";
 // import HelpCenterComponent from "./components/footer/help-center.tsx";
 import GuidelinesComponent from "./components/footer/guidelines.tsx";
@@ -57,7 +62,7 @@ const ProtectedRoute = ({
 };
 
 function App() {
-  const [darkMode, setDarkMode] = useState(
+  const [darkMode] = useState(
     localStorage.getItem("theme") === "dark",
   );
 
@@ -72,6 +77,7 @@ function App() {
   }, [darkMode]);
 
   return (
+     <ErrorBoundary>
     <Router>
       {/* Dark Mode Toggle Button */}
       {/* <div className="fixed top-4 right-4 z-50">
@@ -110,14 +116,23 @@ function App() {
           }
         />
         <Route
-          path="/dashboard"
+          path="/story-inspiration"
           element={
-            <ProtectedRoute
-              element={<DashboardLayout />}
-              allowedRoles={[USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN]}
-            />
+            <RootLayout>
+              <StoryInspirationWrapper />
+            </RootLayout>
           }
-        >
+        />
+
+<Route
+  path="/dashboard"
+  element={
+    <ProtectedRoute
+      element={<DashboardLayout />}
+      allowedRoles={[USER_ROLE.ADMIN]}
+    />
+  }
+>
           <Route
             index
             element={
@@ -214,8 +229,8 @@ function App() {
               />
             }
           />
-        </Route>
-
+        
+         </Route>     
         <Route
           path="/stories"
           element={
@@ -238,6 +253,7 @@ function App() {
           element={<EmailValidationComponent />}
         />
 
+
         <Route
           path="/signup"
           element={
@@ -254,14 +270,24 @@ function App() {
             </RootLayout>
           }
         />
-        <Route
-          path="/explore"
-          element={
-            <RootLayout>
-              <ExploreComponent />
-            </RootLayout>
-          }
-        />
+       <Route
+  path="/explore"
+  element={
+    <ProtectedRoute
+      element={
+        <RootLayout>
+          <ExploreComponent />
+        </RootLayout>
+      }
+      allowedRoles={[
+        USER_ROLE.USER,
+        USER_ROLE.WRITER,
+        USER_ROLE.ADMIN,
+        USER_ROLE.SUPER_ADMIN,
+      ]}
+    />
+  }
+/>
         <Route
           path="/help"
           element={
@@ -289,15 +315,6 @@ function App() {
           }
         />
         <Route
-          path="/community"
-          element={
-            <RootLayout>
-              <CommunityComponent />
-            </RootLayout>
-          }
-        />
-
-        <Route
           path="/post/:id"
           element={
             <RootLayout>
@@ -322,13 +339,23 @@ function App() {
           }
         />
         <Route
-          path="/contact-us"
-          element={
-            <RootLayout>
-              <ContactUsComponent />
-            </RootLayout>
-          }
-        />
+  path="/contact-us"
+  element={
+    <ProtectedRoute
+      element={
+        <RootLayout>
+          <Contact />
+        </RootLayout>
+      }
+      allowedRoles={[
+        USER_ROLE.USER,
+        USER_ROLE.WRITER,
+        USER_ROLE.ADMIN,
+        USER_ROLE.SUPER_ADMIN,
+      ]}
+    />
+  }
+/>
         <Route
           path="/blog"
           element={
@@ -353,14 +380,24 @@ function App() {
             </RootLayout>
           }
         />
-        <Route
-          path="/community"
-          element={
-            <RootLayout>
-              <CommunityComponent />
-            </RootLayout>
-          }
-        />
+       <Route
+  path="/community"
+  element={
+    <ProtectedRoute
+      element={
+        <RootLayout>
+          <CommunityComponent />
+        </RootLayout>
+      }
+      allowedRoles={[
+        USER_ROLE.USER,
+        USER_ROLE.WRITER,
+        USER_ROLE.ADMIN,
+        USER_ROLE.SUPER_ADMIN,
+      ]}
+    />
+  }
+/>
         <Route
           path="*"
           element={
@@ -371,6 +408,7 @@ function App() {
         />
       </Routes>
     </Router>
+    </ErrorBoundary>
   );
 }
 export default App;
