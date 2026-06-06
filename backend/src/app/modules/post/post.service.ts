@@ -14,7 +14,6 @@ import paginationHelper from "../../../utils/pagination_helper";
 import { postSearchFields } from "./post.constant";
 import { SortOrder, Types } from "mongoose";
 import { GamificationService } from "../gamification/gamification.service";
-import { WritingStreakService } from "../gamification/writing_streak.service";
 
 const MAX_SEARCH_TERM_LENGTH = 100;
 
@@ -111,14 +110,14 @@ const createPost = async (payload: IPostPayload, token: ITokenPayload) => {
       author: user._id,
       updatedBy: user._id,
     });
-    if (res && res.isPublished) {
-      user.postsCount += 1;
-      await user.save();
-      GamificationService.addXp(String(user._id), 50, "CREATED_POST").catch(console.error);
-      if (user.postsCount === 1) {
-        GamificationService.awardBadge(String(user._id), "First Story").catch(console.error);
+      if (res && res.isPublished) {
+        user.postsCount += 1;
+        await user.save();
+        GamificationService.addXp(String(user._id), 50, "CREATED_POST").catch(console.error);
+        if (user.postsCount === 1) {
+          GamificationService.awardBadge(String(user._id), "First Story").catch(console.error);
+        }
       }
-    }
     return res;
   } catch (error) {
     throw new ApiError(
@@ -157,6 +156,7 @@ const getPosts = async (
         })),
       });
     }
+    
   }
 
   if (trendingTopic) {
@@ -194,7 +194,6 @@ const getPosts = async (
 
   const countCondition = andCondition.length > 0 ? { $and: andCondition } : {};
 
-  // sort condition
   const sortCondition: { [key: string]: SortOrder } = {};
   if (sortFilter === "mostPopular") {
     sortCondition.likesCount = -1;
@@ -305,6 +304,7 @@ const getLatestPosts = async () => {
         path: "reactions",
         populate: { path: "userId", select: "email" },
       })
+      .populate("bookmarks", "email");
     return res;
   } catch (error) {
     throw new ApiError(
@@ -328,6 +328,7 @@ const getFeaturedPosts = async () => {
         path: "reactions",
         populate: { path: "userId", select: "email" },
       })
+      .populate("bookmarks", "email");
     return res;
   } catch (error) {
     throw new ApiError(
@@ -360,6 +361,7 @@ const getSinglePost = async (id: string) => {
       path: "reactions",
       populate: { path: "userId", select: "email" },
     })
+    .populate("bookmarks", "email");
   if (!postById) {
     throw new ApiError(httpStatus.NOT_FOUND, "Post not found!");
   }
@@ -382,6 +384,7 @@ const getPostsByTag = async (tag: string, excludeId?: string) => {
       path: "reactions",
       populate: { path: "userId", select: "email" },
     })
+    .populate("bookmarks", "email");
   return result;
 };
 
@@ -444,7 +447,6 @@ const updatePost = async (
     throw new ApiError(httpStatus.NOT_FOUND, "Post not found!");
   }
 
-  // Enforce ownership
   if (
     post.author.toString() !== user._id.toString() &&
     user.role !== "admin" &&
@@ -453,7 +455,6 @@ const updatePost = async (
     throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to edit this story!");
   }
 
-  // Automatically create version snapshot of the current state BEFORE overwriting
   await StoryVersionService.createVersionSnapshot(
     postId,
     user._id.toString(),
@@ -461,7 +462,6 @@ const updatePost = async (
     payload.generationType || "edited"
   );
 
-  // Overwrite post content
   if (payload.title !== undefined) post.title = payload.title;
   if (payload.content !== undefined) post.content = payload.content;
   if (payload.tag !== undefined) post.tag = payload.tag;
@@ -469,8 +469,6 @@ const updatePost = async (
 
   post.updatedBy = user._id;
   await post.save();
-
-  WritingStreakService.updateStreakAndUnlocks(String(user._id)).catch(console.error);
 
   return post;
 };
@@ -506,7 +504,6 @@ const deletePost = async (postId: string, token: ITokenPayload) => {
     await user.save();
   }
 
-  // Clean up associated bookmarks when story post is soft-deleted
   await Bookmark.deleteMany({ storyId: postId });
 
   return post;
@@ -536,7 +533,6 @@ const remixStory = async (postId: string, prompt: string, token: ITokenPayload) 
   if (res) {
     user.postsCount += 1;
     await user.save();
-    WritingStreakService.updateStreakAndUnlocks(String(user._id)).catch(console.error);
   }
 
   return res;
@@ -566,7 +562,6 @@ const translateStory = async (postId: string, language: string, token: ITokenPay
   if (res) {
     user.postsCount += 1;
     await user.save();
-    WritingStreakService.updateStreakAndUnlocks(String(user._id)).catch(console.error);
   }
 
   return res;
@@ -589,7 +584,7 @@ export const PostService = {
   toggleBookmark,
   updatePost,
   deletePost,
-  remixStory,       // Exposed service for AI story variations
-  translateStory,   // Exposed service for localized modifications
+  remixStory,
+  translateStory,
   getGenres,
 };
